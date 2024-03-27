@@ -1,20 +1,27 @@
 package com.example.desafioaula.controller;
 
-import com.example.desafioaula.model.ValorDTO;
-import com.example.desafioaula.model.Conta;
-import com.example.desafioaula.model.PixDTO;
-import com.example.desafioaula.repository.ContaRepository;
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.desafioaula.model.Conta;
+import com.example.desafioaula.model.PixDTO;
+import com.example.desafioaula.model.ValorDTO;
+import com.example.desafioaula.repository.ContaRepository;
 
 import jakarta.validation.Valid;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/conta")
@@ -51,7 +58,7 @@ public class ContaController {
         return ResponseEntity.ok(conta);
     }
 
-    @PutMapping("/{id}/encerrar")
+    @DeleteMapping("/{id}/encerrar")
     public ResponseEntity<Void> encerrarConta(@PathVariable Long id) {
         Conta conta = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta não encontrada"));
@@ -77,33 +84,33 @@ public class ContaController {
         repository.save(conta);
         return ResponseEntity.ok(conta);
     }
-
-   @PutMapping("/pix")
-public ResponseEntity<Void> pix(@Valid @RequestBody PixDTO pixDTO) {
-
-    Conta contaOrigem = repository.findById(pixDTO.getIdContaOrigem())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta de origem não encontrada"));
-
+    @PutMapping("/pix")
+    public ResponseEntity<Void> pix(@Valid @RequestBody PixDTO pixDTO) {
     
-    Conta contaDestino = repository.findById(pixDTO.getIdContaDestino())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta de destino não encontrada"));
-
+        Conta contaOrigem = repository.findById(pixDTO.getIdContaOrigem())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta de origem não encontrada"));
     
-    BigDecimal valor = pixDTO.getValor();
-    if (contaOrigem.getSaldo().compareTo(valor) < 0) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo insuficiente na conta de origem");
+        
+        Conta contaDestino = repository.findById(pixDTO.getIdContaDestino())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta de destino não encontrada"));
+    
+        
+        BigDecimal valor = pixDTO.getValor();
+        if (contaOrigem.getSaldo().compareTo(valor) < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo insuficiente na conta de origem");
+        }
+    
+        
+        contaOrigem.saque(valor);
+    
+        
+        contaDestino.deposito(valor);
+    
+        // Salvar as alterações no banco de dados
+        repository.save(contaOrigem);
+        repository.save(contaDestino);
+    
+        return ResponseEntity.ok().build();
     }
-
     
-    contaOrigem.saque(valor);
-
-    
-    contaDestino.deposito(valor);
-
-    // Salvar as alterações no banco de dados
-    repository.save(contaOrigem);
-    repository.save(contaDestino);
-
-    return ResponseEntity.ok().build();
-}
 }

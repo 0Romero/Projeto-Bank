@@ -1,6 +1,5 @@
 package com.example.desafioaula.validation;
 
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,14 +11,11 @@ import jakarta.validation.Payload;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = TipoMovimentacaoValidator.class)
-public @interface TipoMovimentacao {
+public @interface TipoMovimentacaoConstraint {
 
-    String message() default "{movement.type}";
-
+    String message() default "Invalid TipoMovimentacao";
+    
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-
-    // Definição dos valores da enumeração
-    Movimentacao value();
 }
