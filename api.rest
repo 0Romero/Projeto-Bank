@@ -1,0 +1,49 @@
+GET http://localhost:8080
+
+
+###
+
+
+POST http://localhost:8080/conta
+Content-Type: application/json
+
+{
+    "name": "Felipe",
+    "cpf": "111.111.111-01",
+    "accountNumber": "001-000",
+    "agencia":"123",
+    "dataAbertura":"2024-04-01",
+    "statusConta": "True",
+    "tipoConta": "Corrente",
+    "saldo":100.0
+}
+
+###
+
+PUT http://localhost:8080/conta/pix
+Content-Type: application/json
+
+
+{
+    "idContaOrigem": 3,
+    "idContaDestino": 2,
+    "valor": 100.00,
+    "dataPix": "2024-04-01"
+}
+
+###
+
+GET http://localhost:8080/conta
+
+
+###
+
+DELETE http://localhost:8080/conta/2/encerrar
+
+###
+PUT http://localhost:8080/conta/3/deposito
+Content-Type: application/json
+
+{
+    "valor": 1000.00
+}
